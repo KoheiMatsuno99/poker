@@ -1,0 +1,39 @@
+@startuml poker
+package game {
+    entity poker_table
+    entity playing_table
+    entity player
+    entity card
+}
+
+entity poker_table {
+    * id <<PK>>
+    * guid <<UK>>
+}
+
+entity playing_table {
+    * id <<PK>>
+    * poker_table_id <<FK>>
+    * player_id <<FK>>
+}
+
+entity player {
+    * id <<PK>>
+    * guid <<UK>>
+    * name
+    * balance
+}
+
+entity card {
+    * id <<PK>>
+    * guid <<UK>>
+    * player_id <<FK>>
+    * suit
+    * rank
+}
+
+poker_table ||--{ playing_table
+player ||--{ playing_table
+player ||--o{ card
+
+@enduml
