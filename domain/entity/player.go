@@ -13,7 +13,6 @@ type Player struct {
 	ante       int //　ゲームの参加料
 	chips      int // 掛け金
 	cards      []*valueobject.Card
-	status     string
 }
 
 func NewPlayer(name string, money int) *Player {
