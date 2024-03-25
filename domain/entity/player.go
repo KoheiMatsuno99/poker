@@ -8,17 +8,17 @@ import (
 )
 
 type Player struct {
-	name       string
-	money      int
-	ante       int //　ゲームの参加料
-	chips      int // 掛け金
-	cards      []*valueobject.Card
+	name  string
+	money int
+	ante  int //　ゲームの参加料
+	chips int // 掛け金
+	cards []*valueobject.Card
 }
 
 func NewPlayer(name string, money int) *Player {
 	return &Player{
-		name:       name,
-		money:      money,
+		name:  name,
+		money: money,
 	}
 }
 
@@ -80,15 +80,15 @@ func (p *Player) sortCards() error {
 }
 
 var handRankMap = map[string]int{
-	"ハイカード": 0,
-	"ワンペア":   1,
-	"ツーペア":   2,
-	"スリーカード": 3,
-	"ストレート":  4,
-	"フラッシュ":   5,
-	"フルハウス":   6,
-	"フォーカード":  7,
-	"ストレートフラッシュ": 8,
+	"ハイカード":          0,
+	"ワンペア":           1,
+	"ツーペア":           2,
+	"スリーカード":         3,
+	"ストレート":          4,
+	"フラッシュ":          5,
+	"フルハウス":          6,
+	"フォーカード":         7,
+	"ストレートフラッシュ":     8,
 	"ロイヤルストレートフラッシュ": 9,
 }
 
@@ -96,39 +96,39 @@ func HandRankMap() map[string]int {
 	return handRankMap
 }
 
-func (p *Player) JudgeHandsScore() (int, error) {
+func (p *Player) JudgeHandsScore() (string, error) {
 	err := p.sortCards()
 	if err != nil {
-		return -1, err
+		return "", err
 	}
 	if p.isRoyalStraightFlush() {
-		return handRankMap["ロイヤルストレートフラッシュ"], nil
+		return "ロイヤルストレートフラッシュ", nil
 	}
 	if p.isStraightFlush() {
-		return handRankMap["ストレートフラッシュ"], nil
+		return "ストレートフラッシュ", nil
 	}
 	if p.isFourCard() {
-		return handRankMap["フォーカード"], nil
+		return "フォーカード", nil
 	}
 	if p.isFullHouse() {
-		return handRankMap["フルハウス"], nil
+		return "フルハウス", nil
 	}
 	if p.isFlush() {
-		return handRankMap["フラッシュ"], nil
+		return "フラッシュ", nil
 	}
 	if p.isStraight() {
-		return handRankMap["ストレート"], nil
+		return "ストレート", nil
 	}
 	if p.isThreeCard() {
-		return handRankMap["スリーカード"], nil
+		return "スリーカード", nil
 	}
 	if p.isTwoPair() {
-		return handRankMap["ツーペア"], nil
+		return "ツーペア", nil
 	}
 	if p.isOnePair() {
-		return handRankMap["ワンペア"], nil
+		return "ワンペア", nil
 	}
-	return handRankMap["ハイカード"], nil
+	return "ハイカード", nil
 }
 
 func (p *Player) isRoyalStraightFlush() bool {

@@ -376,7 +376,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    int
+		want    string
 		wantErr bool
 	}{
 		{
@@ -390,7 +390,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 					valueobject.NewCard("spade", "10"),
 				},
 			},
-			want:    HandRankMap()["ロイヤルストレートフラッシュ"],
+			want:    "ロイヤルストレートフラッシュ",
 			wantErr: false,
 		},
 		{
@@ -404,7 +404,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 					valueobject.NewCard("spade", "5"),
 				},
 			},
-			want:    HandRankMap()["ストレートフラッシュ"],
+			want:    "ストレートフラッシュ",
 			wantErr: false,
 		},
 		{
@@ -418,7 +418,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 					valueobject.NewCard("spade", "5"),
 				},
 			},
-			want:    HandRankMap()["ストレートフラッシュ"],
+			want:    "ストレートフラッシュ",
 			wantErr: false,
 		},
 		{
@@ -432,7 +432,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 					valueobject.NewCard("heart", "A"),
 				},
 			},
-			want:    HandRankMap()["フォーカード"],
+			want:    "フォーカード",
 			wantErr: false,
 		},
 		{
@@ -446,7 +446,7 @@ func TestPlayer_JudgeHandsScore(t *testing.T) {
 					valueobject.NewCard("diamond", "2"),
 				},
 			},
-			want:    HandRankMap()["フルハウス"],
+			want:    "フルハウス",
 			wantErr: false,
 		},
 	}
@@ -603,7 +603,7 @@ func TestPlayer_isStraightFlush(t *testing.T) {
 
 func TestPlayer_isFourCard(t *testing.T) {
 	type fields struct {
-		cards      []*valueobject.Card
+		cards []*valueobject.Card
 	}
 	tests := []struct {
 		name   string
@@ -640,7 +640,7 @@ func TestPlayer_isFourCard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Player{
-				cards:      tt.fields.cards,
+				cards: tt.fields.cards,
 			}
 			if got := p.isFourCard(); got != tt.want {
 				t.Errorf("Player.isFourCard() = %v, want %v", got, tt.want)
@@ -648,7 +648,6 @@ func TestPlayer_isFourCard(t *testing.T) {
 		})
 	}
 }
-
 
 func TestPlayer_isStraight(t *testing.T) {
 	type fields struct {
@@ -710,4 +709,3 @@ func TestPlayer_isStraight(t *testing.T) {
 		})
 	}
 }
-
