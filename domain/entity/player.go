@@ -53,7 +53,7 @@ func (p *Player) Bet(chips int) error {
 
 const numberOfCards = 5
 
-func (p *Player) sortCards() error {
+func (p *Player) SortCards() error {
 	if len(p.cards) != numberOfCards {
 		return fmt.Errorf("number of cards is not %d", numberOfCards)
 	}
@@ -96,8 +96,8 @@ func HandRankMap() map[string]int {
 	return handRankMap
 }
 
-func (p *Player) JudgeHandsScore() (string, error) {
-	err := p.sortCards()
+func (p *Player) JudgeHands() (string, error) {
+	err := p.SortCards()
 	if err != nil {
 		return "", err
 	}
@@ -239,4 +239,109 @@ func (p *Player) isOnePair() bool {
 		return true
 	}
 	return false
+}
+
+// ワンペアの配列、それ以外の配列の順番で返す
+func (p *Player) SeparateOnePairAndOtherCards() ([][]*valueobject.Card, error){
+	hands, err := p.JudgeHands()
+	if err != nil {
+		return nil, err
+	}
+	if hands != "ワンペア" {
+		return nil, fmt.Errorf("not one pair")
+	}
+	if p.cards[0].Value() == p.cards[1].Value() {
+		return [][]*valueobject.Card{{p.cards[0], p.cards[1]}, {p.cards[2], p.cards[3], p.cards[4]}}, nil
+	}
+	if p.cards[1].Value() == p.cards[2].Value() {
+		return [][]*valueobject.Card{{p.cards[1], p.cards[2]}, {p.cards[0], p.cards[3], p.cards[4]}}, nil
+	}
+	if p.cards[2].Value() == p.cards[3].Value() {
+		return [][]*valueobject.Card{{p.cards[2], p.cards[3]}, {p.cards[0], p.cards[1], p.cards[4]}}, nil
+	}
+	if p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[3], p.cards[4]}, {p.cards[0], p.cards[1], p.cards[2]}}, nil
+	}
+	return nil, fmt.Errorf("not one pair")
+}
+
+// ツーペアの強い方の配列、ツーペアの弱い方の配列、それ以外の配列の順番で返す
+func (p *Player) SeparateTwoPairAndOtherCards() ([][]*valueobject.Card, error){
+	hands, err := p.JudgeHands()
+	if err != nil {
+		return nil, err
+	}
+	if hands != "ツーペア" {
+		return nil, fmt.Errorf("not two pair")
+	}
+	if p.cards[0].Value() == p.cards[1].Value() && p.cards[2].Value() == p.cards[3].Value() {
+		return [][]*valueobject.Card{{p.cards[2], p.cards[3]},{p.cards[0], p.cards[1]}, {p.cards[4]}}, nil
+	}
+	if p.cards[0].Value() == p.cards[1].Value() && p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[3], p.cards[4]},{p.cards[0], p.cards[1]}, {p.cards[2]}}, nil
+	}
+	if p.cards[1].Value() == p.cards[2].Value() && p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[3], p.cards[4]},{p.cards[1], p.cards[2]}, {p.cards[0]}}, nil
+	}
+	return nil, fmt.Errorf("not two pair")
+}
+
+// スリーカードの配列、それ以外の配列の順番で返す
+func (p *Player) SeparateThreeOfAKindsAndOtherCards() ([][]*valueobject.Card, error){
+	hands, err := p.JudgeHands()
+	if err != nil {
+		return nil, err
+	}
+	if hands != "スリーカード"{
+		return nil, fmt.Errorf("not three of a kind")
+	}
+	if p.cards[0].Value() == p.cards[1].Value() && p.cards[1].Value() == p.cards[2].Value() {
+		return [][]*valueobject.Card{{p.cards[0], p.cards[1], p.cards[2]}, {p.cards[3], p.cards[4]}}, nil
+	}
+	if p.cards[1].Value() == p.cards[2].Value() && p.cards[2].Value() == p.cards[3].Value() {
+		return [][]*valueobject.Card{{p.cards[1], p.cards[2], p.cards[3]}, {p.cards[0], p.cards[4]}}, nil
+	}
+	if p.cards[2].Value() == p.cards[3].Value() && p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[2], p.cards[3], p.cards[4]}, {p.cards[0], p.cards[1]}}, nil
+	}
+	return nil, fmt.Errorf("not three of a kind")
+}
+
+// 3枚組の配列、2枚組の配列の順番で返す
+func (p *Player) SeparateThreeOfAKindAndOnePair() ([][]*valueobject.Card, error){
+	hands, err := p.JudgeHands()
+	if err != nil {
+		return nil, err
+	}
+	if hands != "フルハウス" {
+		return nil, fmt.Errorf("not full house")
+	}
+	if p.cards[0].Value() == p.cards[1].Value() && p.cards[1].Value() == p.cards[2].Value() && p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[0], p.cards[1], p.cards[2]}, {p.cards[3], p.cards[4]}}, nil
+	}
+	if p.cards[0].Value() == p.cards[1].Value() && p.cards[2].Value() == p.cards[3].Value() && p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[2], p.cards[3], p.cards[4]},{p.cards[0], p.cards[1]}}, nil
+	}
+	return nil, fmt.Errorf("not full house")
+}
+
+func (p *Player) SeparateFourOfAKindAndOtherCard() ([][]*valueobject.Card, error) {
+	hands, err := p.JudgeHands()
+	if err != nil {
+		return nil, err
+	}
+	if hands != "フォーカード" {
+		return nil, fmt.Errorf("not four of a kind")
+	}
+	if p.cards[0].Value() == p.cards[1].Value() &&
+		p.cards[1].Value() == p.cards[2].Value() &&
+		p.cards[2].Value() == p.cards[3].Value() {
+		return [][]*valueobject.Card{{p.cards[0], p.cards[1], p.cards[2], p.cards[3]}, {p.cards[4]}}, nil
+	}
+	if p.cards[1].Value() == p.cards[2].Value() &&
+		p.cards[2].Value() == p.cards[3].Value() &&
+		p.cards[3].Value() == p.cards[4].Value() {
+		return [][]*valueobject.Card{{p.cards[1], p.cards[2], p.cards[3], p.cards[4]}, {p.cards[0]}}, nil
+	}
+	return nil, fmt.Errorf("not four of a kind")
 }
