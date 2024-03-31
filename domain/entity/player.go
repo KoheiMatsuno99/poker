@@ -10,9 +10,9 @@ import (
 type Player struct {
 	name  string
 	money int
-	ante  int //　ゲームの参加料
 	chips int // 掛け金
 	cards []*valueobject.Card
+	isActive bool
 }
 
 func NewPlayer(name string, money int) *Player {
@@ -30,16 +30,20 @@ func (p *Player) Money() int {
 	return p.money
 }
 
-func (p *Player) Ante() int {
-	return p.ante
-}
-
 func (p *Player) Chips() int {
 	return p.chips
 }
 
 func (p *Player) Cards() []*valueobject.Card {
 	return p.cards
+}
+
+func (p *Player) IsActive() bool {
+	return p.isActive
+}
+
+func (p *Player) DrawCard(card *valueobject.Card) {
+	p.cards = append(p.cards, card)
 }
 
 func (p *Player) Bet(chips int) error {
@@ -49,6 +53,10 @@ func (p *Player) Bet(chips int) error {
 	p.chips = chips
 	p.money -= chips
 	return nil
+}
+
+func (p *Player) Win(chips int) {
+	p.money += chips
 }
 
 const numberOfCards = 5
