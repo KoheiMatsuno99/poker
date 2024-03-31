@@ -603,6 +603,33 @@ func TestCompareMainPart(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "フォーカードで勝者が複数いる場合",
+			args: args{
+				players: []*Player{
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("spade", "4"),
+							valueobject.NewCard("heart", "9"),
+							valueobject.NewCard("club", "9"),
+							valueobject.NewCard("diamond", "9"),
+							valueobject.NewCard("spade", "9"),
+						},
+					},
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("club", "4"),
+							valueobject.NewCard("heart", "9"),
+							valueobject.NewCard("diamond", "9"),
+							valueobject.NewCard("heart", "9"),
+							valueobject.NewCard("club", "9"),
+						},
+					},
+				},
+				hand: "フォーカード",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -747,6 +774,202 @@ func TestCompareSubMainPart(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CompareSubMainPart() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCompareKicker(t *testing.T) {
+	type args struct {
+		players []*Player
+		hand    string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []*Player
+		wantErr bool
+	}{
+		{
+			name: "ワンペアの場合/キッカーで1番強いカードで決着",
+			args: args{
+				players: []*Player{
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("spade", "2"),
+							valueobject.NewCard("heart", "2"),
+							valueobject.NewCard("club", "4"),
+							valueobject.NewCard("diamond", "8"),
+							valueobject.NewCard("spade", "J"),
+						},
+					},
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("club", "2"),
+							valueobject.NewCard("diamond", "2"),
+							valueobject.NewCard("heart", "4"),
+							valueobject.NewCard("club", "8"),
+							valueobject.NewCard("diamond", "10"),
+						},
+					},
+				},
+				hand: "ワンペア",
+			},
+			want: []*Player{
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("heart", "2"),
+						valueobject.NewCard("spade", "2"),
+						valueobject.NewCard("club", "4"),
+						valueobject.NewCard("diamond", "8"),
+						valueobject.NewCard("spade", "J"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ワンペアの場合/キッカーで引き分け",
+			args: args{
+				players: []*Player{
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("spade", "2"),
+							valueobject.NewCard("heart", "2"),
+							valueobject.NewCard("club", "4"),
+							valueobject.NewCard("diamond", "8"),
+							valueobject.NewCard("spade", "J"),
+						},
+					},
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("club", "2"),
+							valueobject.NewCard("diamond", "2"),
+							valueobject.NewCard("heart", "4"),
+							valueobject.NewCard("club", "8"),
+							valueobject.NewCard("diamond", "J"),
+						},
+					},
+				},
+				hand: "ワンペア",
+			},
+			want: []*Player{
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("heart", "2"),
+						valueobject.NewCard("spade", "2"),
+						valueobject.NewCard("club", "4"),
+						valueobject.NewCard("diamond", "8"),
+						valueobject.NewCard("spade", "J"),
+					},
+				},
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("club", "2"),
+						valueobject.NewCard("diamond", "2"),
+						valueobject.NewCard("heart", "4"),
+						valueobject.NewCard("club", "8"),
+						valueobject.NewCard("diamond", "J"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ツーペアの場合/キッカーで決着",
+			args: args{
+				players: []*Player{
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("spade", "2"),
+							valueobject.NewCard("heart", "2"),
+							valueobject.NewCard("club", "5"),
+							valueobject.NewCard("spade", "5"),
+							valueobject.NewCard("spade", "J"),
+						},
+					},
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("club", "2"),
+							valueobject.NewCard("diamond", "2"),
+							valueobject.NewCard("heart", "5"),
+							valueobject.NewCard("club", "5"),
+							valueobject.NewCard("diamond", "10"),
+						},
+					},
+				},
+				hand: "ツーペア",
+			},
+			want: []*Player{
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("heart", "2"),
+						valueobject.NewCard("spade", "2"),
+						valueobject.NewCard("club", "5"),
+						valueobject.NewCard("spade", "5"),
+						valueobject.NewCard("spade", "J"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ツーペアの場合/キッカーで引き分け",
+			args: args{
+				players: []*Player{
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("spade", "2"),
+							valueobject.NewCard("heart", "2"),
+							valueobject.NewCard("club", "5"),
+							valueobject.NewCard("spade", "5"),
+							valueobject.NewCard("spade", "J"),
+						},
+					},
+					{
+						cards: []*valueobject.Card{
+							valueobject.NewCard("club", "2"),
+							valueobject.NewCard("diamond", "2"),
+							valueobject.NewCard("heart", "5"),
+							valueobject.NewCard("club", "5"),
+							valueobject.NewCard("diamond", "J"),
+						},
+					},
+				},
+				hand: "ツーペア",
+			},
+			want: []*Player{
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("heart", "2"),
+						valueobject.NewCard("spade", "2"),
+						valueobject.NewCard("club", "5"),
+						valueobject.NewCard("spade", "5"),
+						valueobject.NewCard("spade", "J"),
+					},
+				},
+				{
+					cards: []*valueobject.Card{
+						valueobject.NewCard("club", "2"),
+						valueobject.NewCard("diamond", "2"),
+						valueobject.NewCard("club", "5"),
+						valueobject.NewCard("heart", "5"),
+						valueobject.NewCard("diamond", "J"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CompareKicker(tt.args.players, tt.args.hand)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CompareKicker() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CompareKicker() = %v, want %v", got, tt.want)
 			}
 		})
 	}

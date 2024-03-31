@@ -50,6 +50,27 @@ func CompareSubMainPart(players []*Player) ([]*Player, error) {
 	return DetermineStrongestCardForTwoPair(players, "sub")
 }
 
+// キッカーを比較する
+func CompareKicker(players []*Player, hand string) ([]*Player, error) {
+	for _, player := range players {
+		playerHand, err := player.JudgeHands()
+		if err != nil {
+			return nil, err
+		}
+		if playerHand != hand {
+			return nil, fmt.Errorf("player hand is not %s", hand)
+		}
+	}
+	switch hand {
+	case "ワンペア":
+		return DetermineStrongestCardForOnePairKicker(players)
+	case "ツーペア":
+		return DetermineStrongestCardForTwoPairKicker(players)
+	default:
+		return nil, fmt.Errorf("%s does not have kicker", hand)
+	}
+}
+
 func DetermineStrongestCardForOnePair(players []*Player) ([]*Player, error) {
 	winnerCandidate := []*Player{}
 	maxCardRank := 0
@@ -96,12 +117,12 @@ func DetermineStrongestCardForTwoPair(players []*Player, part string) ([]*Player
 			}
 		default:
 			return nil, fmt.Errorf("part is not valid")
-		} 
+		}
 	}
 	return winnerCandidate, nil
 }
 
-func DetermineStrongestCardPlayerForThreeOfAKind(players []*Player) ([]*Player, error){
+func DetermineStrongestCardPlayerForThreeOfAKind(players []*Player) ([]*Player, error) {
 	winnerCandidate := []*Player{}
 	maxCardRank := 0
 	for _, player := range players {
@@ -152,14 +173,15 @@ func DetermineStrongestCardPlayerForFourOfAKind(players []*Player) ([]*Player, e
 			winnerCandidate = []*Player{player}
 			maxCardRank = valueobject.ValueRankMap()[fourCards[0][len(fourCards)-1].Value()]
 		} else if valueobject.ValueRankMap()[fourCards[0][len(fourCards)-1].Value()] == maxCardRank {
-			winnerCandidate = append(winnerCandidate, player)
+			// 52枚で遊ぶ場合、同じランクのフォーカードが複数存在することはない
+			return nil, fmt.Errorf("four of a kind is duplicated")
 		}
 	}
 	return winnerCandidate, nil
 }
 
 func DetermineStrongestCardPlayerForSpecificHands(players []*Player) ([]*Player, error) {
-    winnerCandidate := []*Player{}
+	winnerCandidate := []*Player{}
 	maxCardRank := 0
 	for _, player := range players {
 		if valueobject.ValueRankMap()[player.Cards()[len(player.Cards())-1].Value()] > maxCardRank {
@@ -172,3 +194,50 @@ func DetermineStrongestCardPlayerForSpecificHands(players []*Player) ([]*Player,
 	return winnerCandidate, nil
 }
 
+func DetermineStrongestCardForOnePairKicker(players []*Player) ([]*Player, error) {
+	winnerCandidate := []*Player{}
+	maxCardRank := 0
+	kickerLength := 3
+	for i := kickerLength - 1; i >= 0; i-- {
+		for _, player := range players {
+			onePair, err := player.SeparateOnePairAndOtherCards()
+			if err != nil {
+				return nil, err
+			}
+			if valueobject.ValueRankMap()[onePair[len(onePair)-1][i].Value()] > maxCardRank {
+				winnerCandidate = []*Player{player}
+				maxCardRank = valueobject.ValueRankMap()[onePair[len(onePair)-1][i].Value()]
+			} else if valueobject.ValueRankMap()[onePair[len(onePair)-1][i].Value()] == maxCardRank {
+				winnerCandidate = append(winnerCandidate, player)
+			}
+		}
+		if len(winnerCandidate) == 1 {
+			return winnerCandidate, nil
+		}
+	}
+	return winnerCandidate, nil
+}
+
+func DetermineStrongestCardForTwoPairKicker(players []*Player) ([]*Player, error) {
+	winnerCandidate := []*Player{}
+	maxCardRank := 0
+	kickerLength := 1
+	for i := kickerLength - 1; i >= 0; i-- {
+		for _, player := range players {
+			twoPairs, err := player.SeparateTwoPairAndOtherCards()
+			if err != nil {
+				return nil, err
+			}
+			if valueobject.ValueRankMap()[twoPairs[len(twoPairs)-1][i].Value()] > maxCardRank {
+				winnerCandidate = []*Player{player}
+				maxCardRank = valueobject.ValueRankMap()[twoPairs[len(twoPairs)-1][i].Value()]
+			} else if valueobject.ValueRankMap()[twoPairs[len(twoPairs)-1][i].Value()] == maxCardRank {
+				winnerCandidate = append(winnerCandidate, player)
+			}
+		}
+		if len(winnerCandidate) == 1 {
+			return winnerCandidate, nil
+		}
+	}
+	return winnerCandidate, nil
+}
