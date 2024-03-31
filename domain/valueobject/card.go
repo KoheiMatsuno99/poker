@@ -55,3 +55,19 @@ func ValueRankMap() map[string]int {
 func SuitRankMap() map[string]int {
 	return suitRankMap
 }
+
+func Suits() []string {
+	keys := []string{}
+	for key := range suitRankMap {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func Values() []string {
+	keys := []string{}
+	for key := range valueRankMap {
+		keys = append(keys, key)
+	}
+	return keys
+}
